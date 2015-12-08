@@ -55,7 +55,8 @@ public class BezierPathDrawer : MonoBehaviour
 
 		for (int i = 0; i < split; i++) {
 
-			float v = (float)i / split;
+//			float v = (float)i / split;
+			float v = delta * i;
 			
 			BezierPointInfo pInfo = path.GetBezierPointInfo(v);
 			

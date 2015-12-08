@@ -272,6 +272,9 @@ namespace Bezier{
 		}
 	}
 
+	/// <summary>
+	/// Bezier point info.
+	/// </summary>
 	public class BezierPointInfo
 	{
 		public Vector3 point;
