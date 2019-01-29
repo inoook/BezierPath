@@ -13,13 +13,13 @@ namespace Bezier{
 		private Bezier[] beziers;
 		private float[] lengthRatio;
 		private int currentBezier=0,previousBezier=0;
-		
+
 		public BezierPath(){ }
-		public BezierPath( Vector3[] pts_ , Quaternion[] rots){
-			setPoints( pts_ , rots);
+		public BezierPath( Vector3[] pts_ , Quaternion[] rots, float precision = 0.05f){
+			setPoints( pts_ , rots, precision);
 		}
 		
-		public void setPoints( Vector3[] pts_, Quaternion[] rots ){
+		public void setPoints( Vector3[] pts_, Quaternion[] rots , float precision = 0.05f){
 			if(pts_.Length<4)
 				Debug.LogError( "LeanTween - When passing values for a vector path, you must pass four or more values!" );
 			if(pts_.Length%4!=0)
@@ -33,7 +33,8 @@ namespace Bezier{
 			int i;
 			length = 0;
 			for(i = 0; i < pts.Length; i+=4){
-				beziers[k] = new Bezier(pts[i+0],pts[i+2],pts[i+1],pts[i+3],0.05f, rots[i/4], rots[i/4+1]);
+//				beziers[k] = new Bezier(pts[i+0],pts[i+2],pts[i+1],pts[i+3],0.05f, rots[i/4], rots[i/4+1]);
+				beziers[k] = new Bezier(pts[i+0],pts[i+2],pts[i+1],pts[i+3], precision, rots[i/4], rots[i/4+1]);
 				length += beziers[k].length;
 				k++;
 			}
@@ -71,13 +72,13 @@ namespace Bezier{
 			return beziers[lengthRatio.Length-1].rot( 1.0f );
 		}
 
-		public BezierPointInfo GetBezierPointInfo( float ratio ){
+		public BezierPointInfo GetBezierPointInfo( float ratio, float tangentAddPer = 0.001f ){
 			float added = 0.0f;
 			for(int i = 0; i < lengthRatio.Length; i++){
 				added += lengthRatio[i];
 				if(added >= ratio){
 					float t = (ratio-(added-lengthRatio[i])) / lengthRatio[i] ;
-					return beziers[i].GetPointInfo(t);
+					return beziers[i].GetPointInfo(t, tangentAddPer);
 				}
 			}
 			return beziers[lengthRatio.Length-1].GetPointInfo( 1.0f );
@@ -255,13 +256,13 @@ namespace Bezier{
 			return Quaternion.Lerp(startRot, endRot, map(t)); 
 		}
 
-		public BezierPointInfo GetPointInfo(float t)
+		public BezierPointInfo GetPointInfo(float t, float tangentAddPer = 0.001f)
 		{
 			BezierPointInfo pInfo = new BezierPointInfo();
 			float v = map(t);
 			pInfo.point = bezierPoint( v ); 
 
-			Vector3 tangent = (this.point (v + 0.001f) - this.point (v)).normalized;
+			Vector3 tangent = (this.point (v + tangentAddPer) - this.point (v)).normalized;
 			pInfo.tangent = tangent;
 
 			Quaternion q = Quaternion.Lerp(startRot, endRot, v);
